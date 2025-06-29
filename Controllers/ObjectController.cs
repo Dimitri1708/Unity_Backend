@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using Unity_Backend.DTO_s;
+using Unity_Backend.Models;
 using Unity_Backend.Repositories;
 
 namespace Unity_Backend.Controllers;
@@ -9,14 +9,11 @@ namespace Unity_Backend.Controllers;
 public class ObjectController(IObjectRepository objectRepository) : ControllerBase
 {
     [HttpPost]
-    public async Task<ActionResult> Create(List<ObjectCreateDto> objectCreateDtoList)
+    public async Task<ActionResult> Create(ObjectCreateDtoListWrapper objectCreateDtoListWrapper)
     {
         try
         {
-            string email = User?.Identity?.Name!;
-            if (string.IsNullOrWhiteSpace(email))
-                return Unauthorized("Email not found in the user context.");
-            await objectRepository.Create(objectCreateDtoList);
+            await objectRepository.Create(objectCreateDtoListWrapper.objectCreateDtoList);
             return Created();
         }
         catch (SqlException ex)
@@ -31,7 +28,7 @@ public class ObjectController(IObjectRepository objectRepository) : ControllerBa
     }
     
     [HttpGet]
-    public async Task<ActionResult<List<ObjectReadDto>>> Read([FromQuery] string environmentId)
+    public async Task<ActionResult<ObjectReadDtoListWrapper>> Read([FromQuery] string environmentId)
     {
         try
         {
@@ -40,7 +37,8 @@ public class ObjectController(IObjectRepository objectRepository) : ControllerBa
             {
                 return NotFound(new {message = "No objects where Found"});
             }
-            return Ok(result);
+            ObjectReadDtoListWrapper objectReadDtoListWrapper = new ObjectReadDtoListWrapper(result);
+            return Ok(objectReadDtoListWrapper);
         }
         catch (SqlException ex)
         {
@@ -54,11 +52,11 @@ public class ObjectController(IObjectRepository objectRepository) : ControllerBa
     }
     
     [HttpPut]
-    public async Task<ActionResult> Update(List<ObjectUpdateDto> objectUpdateDtoList)
+    public async Task<ActionResult> Update(ObjectUpdateDtoListWrapper objectUpdateDtoListWrapper)
     {
         try
         {
-            await objectRepository.Update(objectUpdateDtoList);
+            await objectRepository.Update(objectUpdateDtoListWrapper.objectUpdateDtoList);
             return Ok(new {message = "Objects successfully updated"});
         }
         catch (SqlException ex)
@@ -72,12 +70,12 @@ public class ObjectController(IObjectRepository objectRepository) : ControllerBa
     }
     
     [HttpDelete]
-    public async Task<ActionResult> Delete([FromBody] List<string>? objectIdList)
+    public async Task<ActionResult> Delete([FromBody] ObjectIdListWrapper objectIdListWrapper)
     {
         string fillerString = "";
         try
         {
-            await objectRepository.Delete(objectIdList, fillerString);
+            await objectRepository.Delete(objectIdListWrapper.objectIdList, fillerString);
             return Ok(new { message = "objects deleted successfully."});
         }
         catch(SqlException ex)

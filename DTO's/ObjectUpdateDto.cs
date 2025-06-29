@@ -8,5 +8,4 @@ public class ObjectUpdateDto
     public int positionX { get; set; }
     public int positionY { get; set; }
     public int rotation { get; set; }
-    public string shape { get; set; }
 }

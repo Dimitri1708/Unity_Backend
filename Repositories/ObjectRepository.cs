@@ -51,7 +51,7 @@ public class ObjectRepository(string sqlConnectionString) : IObjectRepository
         await using var sqlConnection = new SqlConnection(sqlConnectionString);
         foreach (var objectUpdateDto in objectUpdateDtoList)
         {
-              await sqlConnection.ExecuteAsync("UPDATE [Object] SET ScaleX = @scaleX, ScaleY = @scaleY, PositionX = @positionX, PositionY = @positionY, Rotation = @rotation, Shape = @shape WHERE ObjectID = @objectId",
+              await sqlConnection.ExecuteAsync("UPDATE [Object] SET ScaleX = @scaleX, ScaleY = @scaleY, PositionX = @positionX, PositionY = @positionY, Rotation = @rotation WHERE ObjectID = @objectId",
                         new
                         {
                             scaleX = objectUpdateDto.scaleX,
@@ -59,7 +59,6 @@ public class ObjectRepository(string sqlConnectionString) : IObjectRepository
                             positionX = objectUpdateDto.positionX,
                             positionY = objectUpdateDto.positionY,
                             rotation = objectUpdateDto.rotation,
-                            shape = objectUpdateDto.shape,
                             objectId = objectUpdateDto.objectId
                         });
         }

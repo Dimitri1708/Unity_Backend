@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Unity_Backend.DTO_s;
+using Unity_Backend.Models;
 using Unity_Backend.Repositories;
 using Unity_Backend.Utilities;
 
@@ -40,7 +41,7 @@ public class EnvironmentController(IEnvironmentRepository environmentRepository,
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<EnvironmentReadDto>>> Read()
+    public async Task<ActionResult<EnvironmentReadDtoListWrapper>> Read()
     {
         try
         {
@@ -48,11 +49,19 @@ public class EnvironmentController(IEnvironmentRepository environmentRepository,
             if (string.IsNullOrWhiteSpace(email))
                 return Unauthorized("Email not found in the user context.");
             var result = await environmentRepository.Read(email);
+
+            foreach (var environment in result)
+            {
+                Console.WriteLine($"this is the result {environment.environmentId}");
+            }
+           
             if (result == null || !result.Any())
             {
                 return NotFound(new {message = "No environments where Found"});
             }
-            return Ok(result);
+
+            EnvironmentReadDtoListWrapper environmentReadDtoListWrapper = new EnvironmentReadDtoListWrapper(result);
+            return Ok(environmentReadDtoListWrapper);
         }
 
         catch (SqlException ex)
